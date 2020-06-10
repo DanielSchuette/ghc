@@ -283,7 +283,7 @@ ioMsgMaybe' ioA = do
 -- -----------------------------------------------------------------------------
 -- | Lookup things in the compiler's environment
 
-hscTcRnLookupRdrName :: HscEnv -> ApiAnnName RdrName -> IO [Name]
+hscTcRnLookupRdrName :: HscEnv -> LocatedN RdrName -> IO [Name]
 hscTcRnLookupRdrName hsc_env0 rdr_name
   = runInteractiveHsc hsc_env0 $
     do { hsc_env <- getHscEnv
@@ -1846,7 +1846,7 @@ hscParseStmtWithLocation source linenumber stmt =
 hscParseType :: String -> Hsc (LHsType GhcPs)
 hscParseType = hscParseThing parseType
 
-hscParseIdentifier :: HscEnv -> String -> IO (ApiAnnName RdrName)
+hscParseIdentifier :: HscEnv -> String -> IO (LocatedN RdrName)
 hscParseIdentifier hsc_env str =
     runInteractiveHsc hsc_env $ hscParseThing parseIdentifier str
 

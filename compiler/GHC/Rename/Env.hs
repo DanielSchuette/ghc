@@ -150,8 +150,8 @@ we do not report deprecation warnings for LocalDef.  See also
 Note [Handling of deprecations]
 -}
 
-newTopSrcBinder :: ApiAnnName RdrName -> RnM Name
-newTopSrcBinder (N loc rdr_name)
+newTopSrcBinder :: LocatedN RdrName -> RnM Name
+newTopSrcBinder (L loc rdr_name)
   | Just name <- isExact_maybe rdr_name
   =     -- This is here to catch
         --   (a) Exact-name binders created by Template Haskell
@@ -246,7 +246,7 @@ lookupTopBndrRn n = do nopt <- lookupTopBndrRn_maybe n
 lookupLocatedTopBndrRn :: LocatedA RdrName -> RnM (LocatedA Name)
 lookupLocatedTopBndrRn = wrapLocMA lookupTopBndrRn
 
-lookupLocatedTopBndrRnN :: ApiAnnName RdrName -> RnM (ApiAnnName Name)
+lookupLocatedTopBndrRnN :: LocatedN RdrName -> RnM (LocatedN Name)
 lookupLocatedTopBndrRnN = wrapLocMN lookupTopBndrRn
 
 lookupTopBndrRn_maybe :: RdrName -> RnM (Maybe Name)
@@ -399,8 +399,8 @@ lookupInstDeclBndr cls what rdr
     doc = what <+> text "of class" <+> quotes (ppr cls)
 
 -----------------------------------------------
-lookupFamInstName :: Maybe Name -> ApiAnnName RdrName
-                  -> RnM (ApiAnnName Name)
+lookupFamInstName :: Maybe Name -> LocatedN RdrName
+                  -> RnM (LocatedN Name)
 -- Used for TyData and TySynonym family instances only,
 -- See Note [Family instance binders]
 lookupFamInstName (Just cls) tc_rdr  -- Associated type; c.f GHC.Rename.Bind.rnMethodBind
@@ -894,7 +894,7 @@ we'll miss the fact that the qualified import is redundant.
 lookupLocatedOccRn :: LocatedA RdrName -> RnM (LocatedA Name)
 lookupLocatedOccRn = wrapLocMA lookupOccRn
 
-lookupLocatedOccRnN :: ApiAnnName RdrName -> RnM (ApiAnnName Name)
+lookupLocatedOccRnN :: LocatedN RdrName -> RnM (LocatedN Name)
 lookupLocatedOccRnN = wrapLocMN lookupOccRn
 
 lookupLocalOccRn_maybe :: RdrName -> RnM (Maybe Name)
@@ -1443,7 +1443,7 @@ lookupSigOccRn ctxt sig = lookupSigCtxtOccRn ctxt (hsSigDoc sig)
 
 lookupSigOccRnN :: HsSigCtxt
                -> Sig GhcPs
-               -> ApiAnnName RdrName -> RnM (ApiAnnName Name)
+               -> LocatedN RdrName -> RnM (LocatedN Name)
 lookupSigOccRnN ctxt sig = lookupSigCtxtOccRnN ctxt (hsSigDoc sig)
 
 
@@ -1451,7 +1451,7 @@ lookupSigOccRnN ctxt sig = lookupSigCtxtOccRnN ctxt (hsSigDoc sig)
 lookupSigCtxtOccRnN :: HsSigCtxt
                     -> SDoc         -- ^ description of thing we're looking up,
                                    -- like "type family"
-                    -> ApiAnnName RdrName -> RnM (ApiAnnName Name)
+                    -> LocatedN RdrName -> RnM (LocatedN Name)
 lookupSigCtxtOccRnN ctxt what
   = wrapLocMN $ \ rdr_name ->
     do { mb_name <- lookupBindGroupOcc ctxt what rdr_name
@@ -1706,10 +1706,10 @@ lookupSyntaxNames :: [Name]                         -- Standard names
 lookupSyntaxNames std_names
   = do { rebindable_on <- xoptM LangExt.RebindableSyntax
        ; if not rebindable_on then
-             return (map (HsVar noExtField . noApiName) std_names, emptyFVs)
+             return (map (HsVar noExtField . noLocA) std_names, emptyFVs)
         else
           do { usr_names <- mapM (lookupOccRn . mkRdrUnqual . nameOccName) std_names
-             ; return (map (HsVar noExtField . noApiName) usr_names, mkFVs usr_names) } }
+             ; return (map (HsVar noExtField . noLocA) usr_names, mkFVs usr_names) } }
 
 -- Error messages
 
